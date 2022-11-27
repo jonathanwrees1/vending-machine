@@ -8,4 +8,4 @@ When the purchase button is clicked, a "receipt" is issued in the form of an ale
 
 Also at the time of clicking the purchase button, the transaction information is sent to a seperate server in the form of a JSON object, and then the response from the server is logged to the console which echoes the data sent with a "success" message.
 
-This is meant to work along with the repository 'boilerplate-express'. A  server which was built with node.js and express. The endpoint is 'http://localhost:3022/vend'. 
+This is meant to work along with the repository 'boilerplate-express'. A  server which was built with node.js and express. The endpoint is 'http://localhost:3002/vend'. 
