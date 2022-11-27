@@ -95,69 +95,73 @@ function removeChips() {
 
 function confirm() {
   //printing a 'receipt'
-  let intro = 'You purchased ';
-  if (sodaCounter === 1) {
-    sodaCounter = sodaCounter + ' Soda, ';
-  } else if (sodaCounter >= 2) {
-    sodaCounter = sodaCounter + ' Sodas, ';
+  if (total.innerHTML === 'Total:$' || total.innerHTML === 'Total:$ -0.00') {
+    return;
   } else {
-    sodaCounter = '';
+    let intro = 'You purchased ';
+    if (sodaCounter === 1) {
+      sodaCounter = sodaCounter + ' Soda, ';
+    } else if (sodaCounter >= 2) {
+      sodaCounter = sodaCounter + ' Sodas, ';
+    } else {
+      sodaCounter = '';
+    }
+
+    if (candyBarCounter === 1) {
+      candyBarCounter = candyBarCounter + ' Candy Bar, ';
+    } else if (candyBarCounter > 0) {
+      candyBarCounter = candyBarCounter + ' Candy Bars, ';
+    } else {
+      candyBarCounter = '';
+    }
+
+    if (chipsCounter === 1) {
+      chipsCounter = chipsCounter + ' Bag of Chips, ';
+    } else if (chipsCounter > 0) {
+      chipsCounter = chipsCounter + ' Bags of Chips, ';
+    } else {
+      chipsCounter = '';
+    }
+    let confirmedPurchase =
+      intro +
+      sodaCounter +
+      candyBarCounter +
+      chipsCounter +
+      'for a total of $' +
+      runningTotal.toFixed(2) +
+      ' ***************** ' +
+      Date();
+
+    alert(confirmedPurchase);
+    runningLedgerList.innerHTML += confirmedPurchase + '<br></br>';
+
+    const data = { sodaCounter, candyBarCounter, chipsCounter, runningTotal };
+
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    };
+
+    fetch('http://localhost:3002/vend', options).then((res) => {
+      console.log(res.json());
+    });
+
+    ///resetting everything except inventory for the next customer
+    soda.innerHTML = '';
+    candyBar.innerHTML = '';
+    chips.innerHTML = '';
+    runningTotal = 0;
+    total.innerHTML = 'Total:$';
+    sodaCounter = 0;
+    candyBarCounter = 0;
+    chipsCounter = 0;
+    sodaList = [];
+    candyBarList = [];
+    chipsList = [];
   }
-
-  if (candyBarCounter === 1) {
-    candyBarCounter = candyBarCounter + ' Candy Bar, ';
-  } else if (candyBarCounter > 0) {
-    candyBarCounter = candyBarCounter + ' Candy Bars, ';
-  } else {
-    candyBarCounter = '';
-  }
-
-  if (chipsCounter === 1) {
-    chipsCounter = chipsCounter + ' Bag of Chips, ';
-  } else if (chipsCounter > 0) {
-    chipsCounter = chipsCounter + ' Bags of Chips, ';
-  } else {
-    chipsCounter = '';
-  }
-  let confirmedPurchase =
-    intro +
-    sodaCounter +
-    candyBarCounter +
-    chipsCounter +
-    'for a total of $' +
-    runningTotal.toFixed(2) +
-    ' ***************** ' +
-    Date();
-
-  alert(confirmedPurchase);
-  runningLedgerList.innerHTML += confirmedPurchase + '<br></br>';
-
-  const data = { sodaCounter, candyBarCounter, chipsCounter };
-
-  const options = {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  };
-
-  fetch('http://localhost:3002/vend', options).then((res) => {
-    console.log(res.json());
-  });
-
-  ///resetting everything except inventory for the next customer
-  soda.innerHTML = '';
-  candyBar.innerHTML = '';
-  chips.innerHTML = '';
-  runningTotal = 0;
-  total.innerHTML = 'Total:$';
-  sodaCounter = 0;
-  candyBarCounter = 0;
-  chipsCounter = 0;
-  sodaList = [];
-  candyBarList = [];
-  chipsList = [];
 }
 
 document.getElementById('soda-button').addEventListener('click', selectSoda);
