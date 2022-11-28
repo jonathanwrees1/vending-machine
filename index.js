@@ -14,6 +14,7 @@ let chips = document.getElementById('chips-column');
 let sodaInventory = document.getElementById('soda-inventory');
 let candyBarInventory = document.getElementById('candy-bar-inventory');
 let chipsInventory = document.getElementById('chips-inventory');
+let transactions = [];
 
 function selectSoda() {
   if (sodaInventory.innerHTML > 0) {
@@ -99,34 +100,37 @@ function confirm() {
     return;
   } else {
     let intro = 'You purchased ';
+    let currentSodaCounter = '';
+    let currentCandyBarCounter = '';
+    let currentChipsCounter = '';
     if (sodaCounter === 1) {
-      sodaCounter = sodaCounter + ' Soda, ';
+      currentSodaCounter = sodaCounter + ' Soda, ';
     } else if (sodaCounter >= 2) {
-      sodaCounter = sodaCounter + ' Sodas, ';
+      currentSodaCounter = sodaCounter + ' Sodas, ';
     } else {
-      sodaCounter = '';
+      currentSodaCounter = '';
     }
 
     if (candyBarCounter === 1) {
-      candyBarCounter = candyBarCounter + ' Candy Bar, ';
+      currentCandyBarCounter = candyBarCounter + ' Candy Bar, ';
     } else if (candyBarCounter > 0) {
-      candyBarCounter = candyBarCounter + ' Candy Bars, ';
+      currentCandyBarCounter = candyBarCounter + ' Candy Bars, ';
     } else {
-      candyBarCounter = '';
+      currentCandyBarCounter = '';
     }
 
     if (chipsCounter === 1) {
-      chipsCounter = chipsCounter + ' Bag of Chips, ';
+      currentChipsCounter = chipsCounter + ' Bag of Chips, ';
     } else if (chipsCounter > 0) {
-      chipsCounter = chipsCounter + ' Bags of Chips, ';
+      currentChipsCounter = chipsCounter + ' Bags of Chips, ';
     } else {
-      chipsCounter = '';
+      currentChipsCounter = '';
     }
     let confirmedPurchase =
       intro +
-      sodaCounter +
-      candyBarCounter +
-      chipsCounter +
+      currentSodaCounter +
+      currentCandyBarCounter +
+      currentChipsCounter +
       'for a total of $' +
       runningTotal.toFixed(2) +
       ' ***************** ' +
@@ -135,19 +139,44 @@ function confirm() {
     alert(confirmedPurchase);
     runningLedgerList.innerHTML += confirmedPurchase + '<br></br>';
 
-    const data = { sodaCounter, candyBarCounter, chipsCounter, runningTotal };
+    //info about current inventory
+    let currentIventory = {
+      Soda: sodaInventory.innerHTML,
+      CandyBars: candyBarInventory.innerHTML,
+      Chips: chipsInventory.innerHTML,
+    };
 
-    const options = {
+    ////posting to server
+    fetch('http://localhost:3002/vend', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data),
-    };
-
-    fetch('http://localhost:3002/vend', options).then((res) => {
-      console.log(res.json());
-    });
+      body: JSON.stringify({
+        id: Date.now(),
+        Sodas: sodaCounter,
+        CandyBars: candyBarCounter,
+        Chips: chipsCounter,
+        Amount: runningTotal.toFixed(2),
+        TodaysDate: Date(),
+        _CurrentInventory: currentIventory,
+      }),
+    }) //server returns the data
+      .then((res) => {
+        const responseData = res.json();
+        return responseData;
+      })
+      //data is pushed into an array and then sent to local storage
+      .then((data) => {
+        transactions.push(data);
+        localStorage.setItem(
+          'TransactionsLedger',
+          JSON.stringify(transactions)
+        );
+        return transactions;
+      })
+      .catch((error) => console.log('ERROR'));
+    console.log(transactions);
 
     ///resetting everything except inventory for the next customer
     soda.innerHTML = '';
